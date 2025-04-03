@@ -23,8 +23,8 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      include: ['/myDashboard'],
-      exclude: undefined,
+      include: undefined,
+      exclude: ['/site' , '/site/*'],
       saveRedirectToCookie: true,
     }
   }
