@@ -439,6 +439,7 @@ footer {
         padding-top: 2rem;
         gap: 2rem;
         transition: transform 100ms ease-in-out;
+        z-index: 10;
     }
 
     .nav-links .btn {
