@@ -111,7 +111,7 @@ const goToSite = (site: string) => {
           </div>
 
           <div class="person-img">
-            <img src="../assets/images/person.png" alt="person" />
+            <img src="../assets/images/person1.png" alt="person" />
           </div>
         </div>
       </section>
