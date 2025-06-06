@@ -2,7 +2,7 @@
 const isLoading = ref(false);
 const showModal = ref(false);
 const modalMessage = ref("");
-const modalType = ref(""); // success or error
+const modalType = ref("");
 
 const formData = ref({
   name: "",
@@ -13,12 +13,14 @@ const formData = ref({
 
 const handleSubmit = async () => {
   isLoading.value = true;
-  showModal.value = false; // Hide the modal before sending
+  showModal.value = false;
 
   try {
     const response = await fetch("/api/portfolio/contact", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(formData.value),
     });
 
@@ -27,7 +29,12 @@ const handleSubmit = async () => {
     if (result.success) {
       modalMessage.value = "Message sent successfully";
       modalType.value = "success";
-      formData.value = { name: "", email: "", phone: "", message: "" };
+      formData.value = {
+        name: "",
+        email: "",
+        phone: "",
+        message: ""
+      };
     } else {
       modalMessage.value = "Failed to send message";
       modalType.value = "error";
@@ -64,9 +71,13 @@ const closeModal = () => {
 //   { url: 'https://dashboard-admin-gamma-nine.vercel.app/', thumbnail: p5 , name: 'Dashboard Admin' },
 // ];
 
-import { useSitesStore } from '../stores/useSites'
+import {
+  useSitesStore
+} from '../stores/useSites'
 
-const { sites } = useSitesStore()
+const {
+  sites
+} = useSitesStore()
 
 const router = useRouter();
 
@@ -88,7 +99,8 @@ const goToSite = (site: string) => {
               <h1>Hi, I am</h1>
 
               <h2>Alireza</h2>
-              <h6>Front-end Developer</h6>
+              <h6>Developer</h6>
+
             </div>
 
             <!-- <div class="contact-me">
@@ -122,23 +134,14 @@ const goToSite = (site: string) => {
         <h4>Email: ashabanpisheh@gmail.com</h4> -->
 
         <div class="contact-me">
-          <a href="mailto:ashabanpisheh@gmail.com" target="_blank"
-            ><i class="fa-solid fa-envelope"></i
-          ></a>
+          <a href="mailto:ashabanpisheh@gmail.com" target="_blank"><i class="fa-solid fa-envelope"></i></a>
 
-          <a href="https://github.com/alireza-shabanpisheh" target="_blank"
-            ><i class="fa-brands fa-github"></i
-          ></a>
+          <a href="https://github.com/alireza-shabanpisheh" target="_blank"><i class="fa-brands fa-github"></i></a>
 
-          <a href="https://t.me/alireza_shiba" target="_blank"
-            ><i class="fa-brands fa-telegram"></i
-          ></a>
+          <a href="https://t.me/alireza_shiba" target="_blank"><i class="fa-brands fa-telegram"></i></a>
 
-          <a
-            href="https://api.whatsapp.com/send/?phone=989335930769&text&type=phone_number&app_absent=0"
-            target="_blank"
-            ><i class="fa-brands fa-whatsapp"></i
-          ></a>
+          <a href="https://api.whatsapp.com/send/?phone=989335930769&text&type=phone_number&app_absent=0"
+            target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
 
           <!-- <a href="#"
                 ><i class="fa-brands fa-linkedin" target="_blank"></i
@@ -155,15 +158,16 @@ const goToSite = (site: string) => {
         <div class="header-info">
           <h4>ABOUT ME</h4>
           <p class="p-tag">
-            Frontend developer with expertise in Vue.js and Nuxt.js frameworks.
-            Experienced in designing and implementing dynamic, responsive, and
-            SEO-friendly web applications. Proficient in advanced Vue.js
-            concepts such as components, routing, and state management, along
-            with server-side rendering (SSR) and static site generation (SSG) in
-            Nuxt.js. Skilled in optimizing performance and enhancing user
-            experience using modern tools and techniques. Looking for new
-            challenges to improve skills and contribute innovative solutions in
-            professional development teams.
+            I don’t just build—I create experiences. The digital world is my canvas, and every project is a chance to
+            blend artistry with precision. Whether it’s crafting seamless interactions, solving complex challenges, or
+            pushing boundaries, my work is driven by one question: How does this make people feel?
+
+            Technology should be intuitive, powerful, and—above all—human. I thrive where innovation meets purpose,
+            turning ideas into reality with clarity and elegance.
+
+            Because exceptional work isn’t just about what it does. It’s about how it resonates.<br><br>
+
+            (Let’s redefine what’s possible.)
           </p>
           <!-- <h6>EXPLORE</h6> -->
           <!-- <img src="../assets/images/separatorBlack 1.png" alt="" /> -->
@@ -194,7 +198,7 @@ const goToSite = (site: string) => {
           <h4>SKILLS</h4>
         </div>
         <div class="using-now">
-          <h4>USING NOW:</h4>
+          <!-- <h4>USING NOW:</h4> -->
           <div class="grid-skills">
             <div class="grid-item item1">
               <img src="../assets/images/html.svg" alt="" />
@@ -233,9 +237,20 @@ const goToSite = (site: string) => {
               <img src="../assets/images/Git-Icon-1788C 1.png" alt="" />
               <h6>Git</h6>
             </div>
+
+            <div class="grid-item item10">
+              <img src="../assets/images/laravel.svg" alt="Laravel" />
+              <h6>Laravel</h6>
+            </div>
+
+            <div class="grid-item item2">
+              <img src="../assets/images/mysql-icon.svg" alt="" />
+              <h6>Mysql</h6>
+            </div>
+
           </div>
         </div>
-        <div class="learning-now">
+        <!-- <div class="learning-now">
           <h4>LEARNING NOW:</h4>
           <div class="grid-skills">
             <div class="grid-item item1">
@@ -247,7 +262,7 @@ const goToSite = (site: string) => {
               <h6>Mysql</h6>
             </div>
           </div>
-        </div>
+        </div> -->
         <!-- <div class="other-skills">
           <h4>OTHER SKILLS:</h4>
           <div class="grid-skills">
@@ -282,14 +297,10 @@ const goToSite = (site: string) => {
           <div v-for="(site, index) in sites" :key="index" class="grid-col card">
             <ClientOnly>
               <div class="fcard-image">
-                <img
-                  :src="site.thumbnail"
-                  alt="Site Thumbnail"
-                  class="card-image"
-                />
+                <img :src="site.thumbnail" alt="Site Thumbnail" class="card-image" />
               </div>
             </ClientOnly>
-            
+
             <h3 class="card-title">{{ site.name }}</h3>
             <NuxtLink :to="`/site/${encodeURIComponent(site.url)}`">
               <button class="visit-btn">View Full Website</button>
@@ -300,7 +311,7 @@ const goToSite = (site: string) => {
             <iframe :src="site" style="width: 100%; height: 85%"></iframe>
             <NuxtLink :to="`/site/${encodeURIComponent(site)}`">
               <button class="visit-btn">View Full Website</button>
-            </NuxtLink> 
+            </NuxtLink>
           </div> -->
 
           <!-- <div class="grid-col col1"></div>
@@ -329,52 +340,21 @@ const goToSite = (site: string) => {
         </div>
 
         <form @submit.prevent="handleSubmit">
-          <input
-            type="text"
-            name="name"
-            id="name"
-            placeholder="ENTER YOUR NAME*"
-            v-model="formData.name"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="ENTER YOUR EMAIL*"
-            v-model="formData.email"
-            required
-          />
-          <input
-            type="text"
-            name="phone"
-            id="phone"
-            placeholder=" YOUR PhONE*"
-            v-model="formData.phone"
-            required
-          />
-          <input
-            type="text"
-            name="comment"
-            id="comment"
-            placeholder="YOUR MESSAGE*"
-            v-model="formData.message"
-            required
-          />
+          <input type="text" name="name" id="name" placeholder="ENTER YOUR NAME*" v-model="formData.name" required />
+          <input type="email" name="email" id="email" placeholder="ENTER YOUR EMAIL*" v-model="formData.email"
+            required />
+          <input type="text" name="phone" id="phone" placeholder=" YOUR PhONE*" v-model="formData.phone" required />
+          <input type="text" name="comment" id="comment" placeholder="YOUR MESSAGE*" v-model="formData.message"
+            required />
           <!-- <button class="btn-submit">SUBMIT</button> -->
           <button class="btn-submit" :disabled="isLoading">
-            {{ isLoading ? "Sending..." : "SUBMIT" }}
+            {{ isLoading ? 'Sending...' : 'SUBMIT' }}
           </button>
         </form>
       </section>
 
       <!-- Modal -->
-      <div
-        v-if="showModal"
-        class="modal"
-        :class="modalType"
-        @click="closeModal"
-      >
+      <div v-if="showModal" class="modal" :class="modalType" @click="closeModal">
         <div class="modal-content" @click.stop>
           <span class="close-btn" @click="closeModal">×</span>
           <p>{{ modalMessage }}</p>
@@ -385,7 +365,6 @@ const goToSite = (site: string) => {
 </template>
 
 <style scoped>
-/* Portfolio Card Style */
 .card {
   border-radius: 10px;
   overflow: hidden;
@@ -399,11 +378,11 @@ const goToSite = (site: string) => {
 }
 
 .card:hover {
-  transform: translateY(-10px); /* کارت به بالا حرکت می‌کند */
+  transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.fcard-image{
+.fcard-image {
   margin: 5px;
   border-radius: 10px;
   overflow: hidden;
@@ -489,4 +468,3 @@ const goToSite = (site: string) => {
   font-size: 1rem;
 }
 </style>
-
