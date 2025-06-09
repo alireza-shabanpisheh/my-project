@@ -158,16 +158,12 @@ const goToSite = (site: string) => {
         <div class="header-info">
           <h4>ABOUT ME</h4>
           <p class="p-tag">
-            I don’t just build—I create experiences. The digital world is my canvas, and every project is a chance to
-            blend artistry with precision. Whether it’s crafting seamless interactions, solving complex challenges, or
-            pushing boundaries, my work is driven by one question: How does this make people feel?
-
-            Technology should be intuitive, powerful, and—above all—human. I thrive where innovation meets purpose,
-            turning ideas into reality with clarity and elegance.
-
-            Because exceptional work isn’t just about what it does. It’s about how it resonates.<br><br>
-
-            (Let’s redefine what’s possible.)
+            I'm a web developer with a strong focus on user interfaces and the front-end experience. I care deeply about
+            building interfaces that are not only visually clear and responsive but also intuitive and enjoyable to use.
+            My interest in web development goes beyond just the UI — I value writing clean, maintainable code and
+            understanding how things work under the hood. Whether it's translating a design into a polished interface or
+            thinking through the structure of a web app, I’m driven by curiosity, care for detail, and a genuine passion
+            for the craft of development.
           </p>
           <!-- <h6>EXPLORE</h6> -->
           <!-- <img src="../assets/images/separatorBlack 1.png" alt="" /> -->
