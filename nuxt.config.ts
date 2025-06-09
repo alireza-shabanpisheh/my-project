@@ -1,4 +1,3 @@
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -17,7 +16,7 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@nuxtjs/supabase', '@pinia/nuxt'],
+  modules: ['@nuxtjs/supabase', '@pinia/nuxt', 'nuxt-toast'],
   supabase: {
     // redirect: false,
     redirectOptions: {

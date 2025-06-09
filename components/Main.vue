@@ -1,8 +1,7 @@
 <script setup lang="ts">
+const toast = useToast()
+
 const isLoading = ref(false);
-const showModal = ref(false);
-const modalMessage = ref("");
-const modalType = ref("");
 
 const formData = ref({
   name: "",
@@ -13,8 +12,6 @@ const formData = ref({
 
 const handleSubmit = async () => {
   isLoading.value = true;
-  showModal.value = false;
-
   try {
     const response = await fetch("/api/portfolio/contact", {
       method: "POST",
@@ -27,8 +24,12 @@ const handleSubmit = async () => {
     const result = await response.json();
 
     if (result.success) {
-      modalMessage.value = "Message sent successfully";
-      modalType.value = "success";
+      toast.success({
+        title: 'Success!',
+        message: 'Message sent successfully.',
+        position: 'topRight',
+        color: 'green',
+      })
       formData.value = {
         name: "",
         email: "",
@@ -36,40 +37,24 @@ const handleSubmit = async () => {
         message: ""
       };
     } else {
-      modalMessage.value = "Failed to send message";
-      modalType.value = "error";
+      toast.error({
+        title: 'Error!',
+        message: 'Failed to send message.',
+        position: 'topRight',
+        color: 'red',
+      })
     }
   } catch (error) {
-    modalMessage.value = "Network error";
-    modalType.value = "error";
+    toast.error({
+      title: 'Error!',
+      message: 'Network error.',
+      position: 'topRight',
+      color: 'red',
+    })
   } finally {
-    showModal.value = true; // Show the modal
-    isLoading.value = false; // Reset the button state
-    setTimeout(() => {
-      showModal.value = false; // Hide modal after 2 seconds
-    }, 3000);
+    isLoading.value = false;
   }
 };
-
-const closeModal = () => {
-  showModal.value = false; // Close the modal manually
-};
-
-
-
-// import p1 from '../assets/images/p1.png'
-// import p2 from '../assets/images/p2.png'
-// import p3 from '../assets/images/p3.png'
-// import p4 from '../assets/images/p4.png'
-// import p5 from '../assets/images/p5.png'
-
-// const sites = [
-//   { url: 'https://landing-page-xi-blush-34.vercel.app/', thumbnail: p1 , name: 'Solana Website'},
-//   { url: 'https://lighturngames.fun/', thumbnail: p2 , name: 'lighturngames' },
-//   { url: 'https://mc-donald-s-corporation.vercel.app/', thumbnail: p3 , name: 'McDonald' },
-//   { url: 'https://business-template-nine.vercel.app/', thumbnail: p4 , name: 'Business Template' },
-//   { url: 'https://dashboard-admin-gamma-nine.vercel.app/', thumbnail: p5 , name: 'Dashboard Admin' },
-// ];
 
 import {
   useSitesStore
@@ -97,10 +82,8 @@ const goToSite = (site: string) => {
           <div class="content">
             <div class="info">
               <h1>Hi, I am</h1>
-
               <h2>Alireza</h2>
               <h6>Developer</h6>
-
             </div>
 
             <!-- <div class="contact-me">
@@ -120,6 +103,7 @@ const goToSite = (site: string) => {
                 ><i class="fa-brands fa-github"></i
               ></a>
             </div> -->
+
           </div>
 
           <div class="person-img">
@@ -350,12 +334,14 @@ const goToSite = (site: string) => {
       </section>
 
       <!-- Modal -->
-      <div v-if="showModal" class="modal" :class="modalType" @click="closeModal">
+      <!-- <div v-if="showModal" class="modal" :class="modalType" @click="closeModal">
         <div class="modal-content" @click.stop>
           <span class="close-btn" @click="closeModal">×</span>
           <p>{{ modalMessage }}</p>
         </div>
-      </div>
+      </div> -->
+
+
     </main>
   </div>
 </template>
@@ -417,7 +403,7 @@ const goToSite = (site: string) => {
 }
 
 /* Modal styles */
-.modal {
+/* .modal {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -428,7 +414,6 @@ const goToSite = (site: string) => {
   transition: opacity 0.3s ease;
   z-index: 1000;
 }
-
 .modal.success {
   background-color: green;
 }
@@ -436,14 +421,12 @@ const goToSite = (site: string) => {
 .modal.error {
   background-color: red;
 }
-
 .modal-content {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
 }
-
 .close-btn {
   font-size: 1.5rem;
   cursor: pointer;
@@ -452,7 +435,7 @@ const goToSite = (site: string) => {
 
 .modal p {
   margin: 0;
-}
+} */
 
 .btn-submit {
   cursor: pointer;
