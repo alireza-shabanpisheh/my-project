@@ -510,6 +510,11 @@ body {
   color: var(--text-color);
   font-size: 0.95rem;
   line-height: 1.6;
+  white-space: pre-wrap; /* Preserves line breaks and wraps text */
+  word-wrap: break-word; /* Breaks long words if needed */
+  overflow-wrap: break-word; /* Modern alternative to word-wrap */
+  word-break: break-word; /* Ensures words break properly */
+  max-width: 100%; /* Ensures it doesn't overflow container */
 }
 
 /* Empty State */
