@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 interface Message {
   id: number;
   name: string;
@@ -12,88 +11,323 @@ interface Message {
 const supabase = useSupabaseClient();
 const router = useRouter();
 
+// State
 const messages = ref<Message[]>([]);
-const showMessages = ref(false);
-const isLoading = ref(false); // متغیر برای نمایش لودینگ
+const isLoading = ref(false);
+const sidebarOpen = ref(false);
+const activeTab = ref('');
 
+// Close sidebar when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.sidebar') && !target.closest('.hamburger')) {
+    sidebarOpen.value = false;
+  }
+};
+
+// Add/remove event listener when sidebar opens/closes
+watch(sidebarOpen, (newVal) => {
+  if (newVal) {
+    document.addEventListener('click', handleClickOutside);
+  } else {
+    document.removeEventListener('click', handleClickOutside);
+  }
+});
+
+// Fetch messages
 const fetchMessages = async () => {
-  isLoading.value = true; // نمایش لودینگ هنگام شروع درخواست
+  isLoading.value = true;
   try {
     const response = await fetch("/api/portfolio/contact");
     const data = await response.json();
     if (data.success) {
       messages.value = data.contacts;
-      showMessages.value = true;
+      activeTab.value = 'messages';
     }
   } catch (error) {
-    console.error("خطا در دریافت پیام‌ها:", error);
+    console.error("Error fetching messages:", error);
   } finally {
-    isLoading.value = false; // مخفی کردن لودینگ پس از دریافت داده
+    isLoading.value = false;
   }
 };
 
-// تابع خروج از حساب
-const Signout = async () => {
+// Sign out
+const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (!error) {
     router.push("/");
   }
 };
+
+// Close sidebar when clicking a nav item (for mobile)
+const closeSidebar = () => {
+  if (window.innerWidth < 1024) {
+    sidebarOpen.value = false;
+  }
+};
 </script>
 
-
 <template>
-  <div class="dashboard-container">
+  <div class="dashboard">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button @click.stop="sidebarOpen = !sidebarOpen" class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <h1>Dashboard</h1>
+      <div class="spacer"></div>
+    </header>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="logo">Admin</h2>
-      <nav>
-        <ul class="nav-list">
-          <li class="nav-item">
-            <a class="nav-link cursor" @click="fetchMessages">📩 Messages</a>
+    <aside class="sidebar" :class="{ 'open': sidebarOpen }" @click.stop>
+      <div class="sidebar-header">
+        <h2 class="logo">Admin Panel</h2>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <button 
+              @click="fetchMessages(); closeSidebar()"
+              :class="{ 'active': activeTab === 'messages' }"
+              class="nav-item"
+            >
+              <span class="icon">📩</span>
+              <span class="text">Messages</span>
+            </button>
           </li>
-          <li class="nav-item">
-            <a class="nav-link cursor" @click="showMessages = false">📩 Close Messages</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link cursor" @click="Signout">⚙ Logout</a>
+          <li>
+            <button 
+              @click="signOut()"
+              class="nav-item"
+            >
+              <span class="icon">🔒</span>
+              <span class="text">Logout</span>
+            </button>
           </li>
         </ul>
       </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
-      <!-- نمایش لودینگ هنگام دریافت داده‌ها -->
+    <main class="main-content" @click="sidebarOpen = false">
+      <!-- Loading Spinner -->
       <div v-if="isLoading" class="loading-spinner"></div>
 
-      <!-- نمایش پیام‌ها بعد از لود شدن -->
-      <section v-if="showMessages && !isLoading" class="dashboard-main">
-        <div v-for="message in messages" :key="message.id" class="message-card">
-          <div class="message-header">
-            <h3>{{ message.name }}</h3>
-            <p class="created-at">{{ new Date(message.createdAt).toLocaleString() }}</p>
+      <!-- Messages Section -->
+      <section v-if="activeTab === 'messages' && !isLoading" class="messages-section">
+        <div class="section-header">
+          <h2>Contact Messages</h2>
+          <p>View all messages from your contact form</p>
+        </div>
+
+        <div class="messages-grid">
+          <div v-for="message in messages" :key="message.id" class="message-card">
+            <div class="message-header">
+              <div class="sender-info">
+                <h3>{{ message.name }}</h3>
+                <p class="email">{{ message.email }}</p>
+              </div>
+              <p class="created-at">{{ new Date(message.createdAt).toLocaleString() }}</p>
+            </div>
+            <div class="message-body">
+              <div class="contact-info">
+                <p><strong>Phone:</strong> {{ message.phone }}</p>
+              </div>
+              <div class="message-text">
+                <p>{{ message.message }}</p>
+              </div>
+            </div>
           </div>
-          <p><strong>Email:</strong> {{ message.email }}</p>
-          <p><strong>Phone:</strong> {{ message.phone }}</p>
-          <p><strong>Message:</strong> {{ message.message }}</p>
         </div>
       </section>
+
+      <!-- Empty State -->
+      <div v-if="activeTab === '' && !isLoading" class="empty-state">
+        <div class="empty-content">
+          <h2>Welcome to your Dashboard</h2>
+          <p>Select an option from the sidebar to get started</p>
+        </div>
+      </div>
     </main>
   </div>
 </template>
 
+<style>
+/* Base Styles */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #f8fafc;
+  --sidebar-active: #334155;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --bg-color: #f1f5f9;
+  --card-bg: #ffffff;
+  --text-color: #1e293b;
+  --text-light: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s ease;
+}
 
-<style scoped>
-/* انیمیشن لودینگ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+/* Dashboard Layout */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: none;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 24px;
+  width: 30px;
+  z-index: 110;
+}
+
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: var(--sidebar-text);
+  border-radius: 3px;
+  transition: var(--transition);
+}
+
+.spacer {
+  width: 30px;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: var(--transition);
+  z-index: 100;
+  transform: translateX(-100%);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+}
+
+.nav-item {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--sidebar-text);
+  text-align: left;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: var(--transition);
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  background-color: var(--sidebar-active);
+}
+
+.nav-item .icon {
+  font-size: 1.1rem;
+}
+
+.nav-item .text {
+  font-size: 0.95rem;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: 0;
+  padding: 2rem;
+  min-height: 100vh;
+  transition: var(--transition);
+}
+
+/* Loading Spinner */
 .loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #3498db;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
-  margin: 20px auto;
+  margin: 2rem auto;
 }
 
 @keyframes spin {
@@ -101,135 +335,134 @@ const Signout = async () => {
   100% { transform: rotate(360deg); }
 }
 
-.cursor {
-  cursor: pointer;
+/* Messages Section */
+.section-header {
+  margin-bottom: 2rem;
 }
 
-/* Main Layout */
-.dashboard-container {
-  display: flex;
-  /* background: #000000; */
-  flex-direction: column;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 100%;
-  background: #1c2b38;
-  color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.logo {
-  font-size: 1.6rem;
+.section-header h2 {
+  font-size: 1.5rem;
   font-weight: 600;
-  text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 0.5rem;
 }
 
-.nav-list {
-  list-style: none;
-  padding: 0;
+.section-header p {
+  color: var(--text-light);
 }
 
-.nav-item {
-  margin-bottom: 15px;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  font-size: 1.1rem;
-  padding: 12px 20px;
-  display: block;
-  border-radius: 6px;
-  transition: 0.3s ease;
-}
-
-.nav-link:hover {
-  background: #3b4a60;
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Dashboard Cards */
-.dashboard-main {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-top: 20px;
+.messages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 .message-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  font-size: 1rem;
-  color: #333;
-  width: 100%;
-  word-wrap: break-word; /* اضافه کردن این خط برای شکستن کلمات طولانی */
-  white-space: normal;  /* اطمینان از اینکه متن به خط بعدی برود */
+  background-color: var(--card-bg);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
 }
 
 .message-card:hover {
-  background: #f4f7fc;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .message-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  align-items: flex-start;
 }
 
-.message-header h3 {
-  font-size: 1.2rem;
-  margin: 0;
+.sender-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.sender-info .email {
+  color: var(--primary);
+  font-size: 0.85rem;
 }
 
 .created-at {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.message-body {
+  padding: 1rem;
+}
+
+.contact-info {
+  margin-bottom: 1rem;
+}
+
+.contact-info p {
   font-size: 0.9rem;
-  color: #888;
 }
 
-p {
-  margin: 10px 0;
+.message-text {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
-strong {
-  font-weight: bold;
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 4rem);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .dashboard-container {
-    flex-direction: column;
-  }
+.empty-content {
+  text-align: center;
+  max-width: 400px;
+}
 
+.empty-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.empty-content p {
+  color: var(--text-light);
+}
+
+/* Responsive Styles */
+@media (min-width: 1024px) {
   .sidebar {
-    width: 100%;
-    padding: 15px;
+    transform: translateX(0);
   }
 
-  .header {
-    padding: 15px;
+  .main-content {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-header {
+    display: flex;
   }
 
-  .message-card {
-    width: 100%;
-    margin: 0;
+  .main-content {
+    padding-top: 5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .messages-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-content {
+    padding: 1rem;
+    padding-top: 5rem;
   }
 }
 </style>
