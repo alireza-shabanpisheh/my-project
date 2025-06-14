@@ -10,12 +10,14 @@ interface Message {
 
 const supabase = useSupabaseClient();
 const router = useRouter();
+const toast = useToast()
 
 // State
 const messages = ref<Message[]>([]);
 const isLoading = ref(false);
 const sidebarOpen = ref(false);
 const activeTab = ref('');
+const deletingId = ref<number | null>(null);
 
 // Close sidebar when clicking outside
 const handleClickOutside = (event: MouseEvent) => {
@@ -51,6 +53,40 @@ const fetchMessages = async () => {
   }
 };
 
+// Delete message
+const deleteMessage = async (id: number) => {
+  if (confirm('Are you sure you want to delete this message?')) {
+    deletingId.value = id;
+    try {
+      const response = await fetch(`/api/portfolio/contact/${id}`, {
+        method: 'DELETE'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        messages.value = messages.value.filter(msg => msg.id !== id);
+        toast.success({
+          title: 'Success!',
+          message: 'Message deleted successfully.',
+          position: 'topRight',
+          color: 'green',
+        })
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast.error({
+        title: 'Error!',
+        message: 'Failed to delete message.',
+        position: 'topRight',
+        color: 'red',
+      })
+    } finally {
+      deletingId.value = null;
+    }
+  }
+};
+
 // Sign out
 const signOut = async () => {
   const { error } = await supabase.auth.signOut();
@@ -65,6 +101,11 @@ const closeSidebar = () => {
     sidebarOpen.value = false;
   }
 };
+
+// Fetch messages on component mount
+onMounted(() => {
+  fetchMessages();
+});
 </script>
 
 <template>
@@ -76,14 +117,14 @@ const closeSidebar = () => {
         <span></span>
         <span></span>
       </button>
-      <h1>Dashboard</h1>
+      <h1>Admin Panel</h1>
       <div class="spacer"></div>
     </header>
 
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ 'open': sidebarOpen }" @click.stop>
       <div class="sidebar-header">
-        <h2 class="logo">Admin Panel</h2>
+        <h2 class="logo">Admin</h2>
       </div>
       
       <nav class="sidebar-nav">
@@ -120,7 +161,11 @@ const closeSidebar = () => {
       <section v-if="activeTab === 'messages' && !isLoading" class="messages-section">
         <div class="section-header">
           <h2>Contact Messages</h2>
-          <p>View all messages from your contact form</p>
+          <p>List of all messages received through contact form</p>
+        </div>
+
+        <div v-if="messages.length === 0" class="no-messages">
+          <p>No messages found</p>
         </div>
 
         <div class="messages-grid">
@@ -130,7 +175,18 @@ const closeSidebar = () => {
                 <h3>{{ message.name }}</h3>
                 <p class="email">{{ message.email }}</p>
               </div>
-              <p class="created-at">{{ new Date(message.createdAt).toLocaleString() }}</p>
+              <div class="message-actions">
+                <p class="created-at">{{ new Date(message.createdAt).toLocaleString() }}</p>
+                <button 
+                  @click.stop="deleteMessage(message.id)"
+                  class="delete-btn"
+                  :disabled="deletingId === message.id"
+                  aria-label="Delete message"
+                >
+                  <span v-if="deletingId === message.id" class="loading-dots"></span>
+                  <span v-else>×</span>
+                </button>
+              </div>
             </div>
             <div class="message-body">
               <div class="contact-info">
@@ -147,8 +203,8 @@ const closeSidebar = () => {
       <!-- Empty State -->
       <div v-if="activeTab === '' && !isLoading" class="empty-state">
         <div class="empty-content">
-          <h2>Welcome to your Dashboard</h2>
-          <p>Select an option from the sidebar to get started</p>
+          <h2>Welcome to Admin Panel</h2>
+          <p>Please select an option from the sidebar menu</p>
         </div>
       </div>
     </main>
@@ -164,6 +220,8 @@ const closeSidebar = () => {
   --sidebar-active: #334155;
   --primary: #3b82f6;
   --primary-hover: #2563eb;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
   --bg-color: #f1f5f9;
   --card-bg: #ffffff;
   --text-color: #1e293b;
@@ -350,6 +408,12 @@ body {
   color: var(--text-light);
 }
 
+.no-messages {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+}
+
 .messages-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -388,9 +452,61 @@ body {
   font-size: 0.85rem;
 }
 
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .created-at {
   font-size: 0.75rem;
   color: var(--text-light);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.delete-btn:hover {
+  background-color: #fee2e2;
+  color: var(--danger-hover);
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading-dots {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  color: var(--danger);
+}
+
+.loading-dots::after {
+  content: "...";
+  position: absolute;
+  left: 0;
+  animation: dot-animation 1.5s infinite;
+}
+
+@keyframes dot-animation {
+  0%, 20% { content: "."; }
+  40% { content: ".."; }
+  60%, 100% { content: "..."; }
 }
 
 .message-body {
