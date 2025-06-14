@@ -10,7 +10,6 @@ interface Message {
 
 const supabase = useSupabaseClient();
 const router = useRouter();
-const toast = useToast()
 
 // State
 const messages = ref<Message[]>([]);
@@ -53,37 +52,23 @@ const fetchMessages = async () => {
   }
 };
 
-// Delete message
+// Delete message immediately without confirmation
 const deleteMessage = async (id: number) => {
-  if (confirm('Are you sure you want to delete this message?')) {
-    deletingId.value = id;
-    try {
-      const response = await fetch(`/api/portfolio/contact/${id}`, {
-        method: 'DELETE'
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        messages.value = messages.value.filter(msg => msg.id !== id);
-        toast.success({
-          title: 'Success!',
-          message: 'Message deleted successfully.',
-          position: 'topRight',
-          color: 'green',
-        })
-      }
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      toast.error({
-        title: 'Error!',
-        message: 'Failed to delete message.',
-        position: 'topRight',
-        color: 'red',
-      })
-    } finally {
-      deletingId.value = null;
+  deletingId.value = id;
+  try {
+    const response = await fetch(`/api/portfolio/contact/${id}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      messages.value = messages.value.filter(msg => msg.id !== id);
     }
+  } catch (error) {
+    console.error("Error deleting message:", error);
+  } finally {
+    deletingId.value = null;
   }
 };
 
