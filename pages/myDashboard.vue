@@ -515,6 +515,7 @@ body {
   overflow-wrap: break-word; /* Modern alternative to word-wrap */
   word-break: break-word; /* Ensures words break properly */
   max-width: 100%; /* Ensures it doesn't overflow container */
+  text-align: justify;
 }
 
 /* Empty State */
